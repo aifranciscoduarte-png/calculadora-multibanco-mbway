@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora · Encomendas MB/MB WAY não pagas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Familjen+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0E0F13;
+    --bg-2:      #14151A;
+    --panel:     #16171D;
+    --panel-2:   #1B1D24;
+    --line:      rgba(255,255,255,.08);
+    --line-2:    rgba(255,255,255,.14);
+    --text:      #ECEDF1;
+    --muted:     #8B8F9C;
+    --muted-2:   #5E626E;
+    --loss:      #FF5C49;
+    --loss-dim:  rgba(255,92,73,.14);
+    --gain:      #3BE6A0;
+    --gain-dim:  rgba(59,230,160,.12);
+    --display:   "Fraunces", Georgia, serif;
+    --body:      "Familjen Grotesk", system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    font-family: var(--body);
+    color: var(--text);
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(255,92,73,.10), transparent 60%),
+      radial-gradient(900px 500px at 5% 110%, rgba(59,230,160,.07), transparent 55%),
+      var(--bg);
+    min-height: 100vh;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    position: relative;
+  }
+
+  /* Grão subtil sobre tudo */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: .035;
+    z-index: 9999;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: clamp(28px, 5vw, 72px) clamp(20px, 4vw, 48px) 64px;
+  }
+
+  /* ---------- Header ---------- */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: clamp(32px, 5vw, 56px);
+    opacity: 0;
+    animation: rise .7s .05s cubic-bezier(.2,.7,.2,1) forwards;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    font-weight: 600;
+    letter-spacing: .01em;
+  }
+  .brand .dot {
+    width: 11px; height: 11px;
+    border-radius: 50%;
+    background: var(--loss);
+    box-shadow: 0 0 0 4px var(--loss-dim);
+  }
+  .tag {
+    font-size: .78rem;
+    color: var(--muted);
+    border: 1px solid var(--line);
+    padding: 6px 12px;
+    border-radius: 100px;
+    letter-spacing: .02em;
+  }
+
+  /* ---------- Layout ---------- */
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr);
+    gap: clamp(20px, 3vw, 36px);
+    align-items: start;
+  }
+  @media (max-width: 880px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+
+  /* ---------- Painel de inputs ---------- */
+  .inputs {
+    background: linear-gradient(180deg, var(--panel-2), var(--panel));
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    padding: clamp(22px, 3vw, 32px);
+    opacity: 0;
+    animation: rise .7s .12s cubic-bezier(.2,.7,.2,1) forwards;
+  }
+  .inputs h2 {
+    font-family: var(--body);
+    font-size: .82rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .14em;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+
+  .field { margin-bottom: 26px; }
+  .field:last-child { margin-bottom: 0; }
+
+  .field > label {
+    display: block;
+    font-size: .95rem;
+    font-weight: 500;
+    margin-bottom: 12px;
+    color: var(--text);
+  }
+  .field .hint {
+    display: block;
+    font-size: .8rem;
+    color: var(--muted-2);
+    font-weight: 400;
+    margin-top: 3px;
+  }
+
+  /* Input numérico com sufixo/prefixo */
+  .num {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-2);
+    border: 1px solid var(--line-2);
+    border-radius: 13px;
+    padding: 0 16px;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .num:focus-within {
+    border-color: rgba(255,92,73,.55);
+    box-shadow: 0 0 0 4px var(--loss-dim);
+  }
+  .num .affix { color: var(--muted); font-size: 1rem; font-weight: 500; }
+  .num input {
+    flex: 1;
+    width: 100%;
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 1.25rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    padding: 14px 0;
+    min-width: 0;
+  }
+  /* esconde spinners */
+  .num input::-webkit-outer-spin-button,
+  .num input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .num input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+
+  /* Linha do slider */
+  .pct-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .pct-val {
+    font-family: var(--display);
+    font-size: 1.5rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 100px;
+    background: var(--bg-2);
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--text);
+    border: 4px solid var(--bg);
+    box-shadow: 0 2px 10px rgba(0,0,0,.5);
+    transition: transform .12s;
+  }
+  input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.12); }
+  input[type=range]::-moz-range-thumb {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--text);
+    border: 4px solid var(--bg);
+    box-shadow: 0 2px 10px rgba(0,0,0,.5);
+  }
+  .slider-mb   { accent-color: var(--loss); }
+  .slider-paid { accent-color: var(--gain); }
+
+  .slider-hint {
+    display: block;
+    margin-top: 11px;
+    font-size: .85rem;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .slider-hint b {
+    color: var(--text);
+    font-weight: 600;
+  }
+  .slider-hint.mb b   { color: var(--loss); }
+  .slider-hint.paid b { color: var(--gain); }
+
+  /* ---------- Painel de resultados ---------- */
+  .results {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    opacity: 0;
+    animation: rise .7s .2s cubic-bezier(.2,.7,.2,1) forwards;
+  }
+
+  .hero {
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(600px 240px at 100% 0%, var(--loss-dim), transparent 70%),
+      linear-gradient(180deg, var(--panel-2), var(--panel));
+    border: 1px solid rgba(255,92,73,.22);
+    border-radius: 22px;
+    padding: clamp(26px, 3.2vw, 40px);
+  }
+  .hero .eyebrow {
+    font-size: .82rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .14em;
+    color: var(--loss);
+    margin-bottom: 14px;
+  }
+  .hero .big {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(3.1rem, 9vw, 5.4rem);
+    line-height: .95;
+    letter-spacing: -.02em;
+    color: var(--loss);
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 8px 40px rgba(255,92,73,.25);
+  }
+  .hero .per { color: var(--muted); font-family: var(--body); font-size: 1.1rem; font-weight: 500; }
+  .hero .sub {
+    margin-top: 14px;
+    color: var(--muted);
+    font-size: .98rem;
+    max-width: 46ch;
+  }
+
+  .stat-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  @media (max-width: 460px) { .stat-row { grid-template-columns: 1fr; } }
+
+  .stat {
+    background: linear-gradient(180deg, var(--panel-2), var(--panel));
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 22px;
+  }
+  .stat .k {
+    font-size: .8rem;
+    color: var(--muted);
+    font-weight: 500;
+    letter-spacing: .02em;
+    margin-bottom: 10px;
+  }
+  .stat .v {
+    font-family: var(--display);
+    font-size: clamp(1.7rem, 3.4vw, 2.2rem);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -.01em;
+  }
+
+  .recover {
+    position: relative;
+    background:
+      radial-gradient(520px 220px at 0% 100%, var(--gain-dim), transparent 70%),
+      linear-gradient(180deg, var(--panel-2), var(--panel));
+    border: 1px solid rgba(59,230,160,.28);
+    border-radius: 22px;
+    padding: clamp(24px, 3vw, 34px);
+  }
+  .recover .seal {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: .76rem;
+    font-weight: 600;
+    letter-spacing: .03em;
+    color: var(--gain);
+    background: var(--gain-dim);
+    border: 1px solid rgba(59,230,160,.3);
+    padding: 6px 12px;
+    border-radius: 100px;
+    margin-bottom: 16px;
+  }
+  .recover .seal svg { width: 14px; height: 14px; }
+  .recover .lead { font-size: 1.05rem; color: var(--text); margin-bottom: 6px; }
+  .recover .big {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(2.4rem, 6vw, 3.6rem);
+    line-height: 1;
+    letter-spacing: -.02em;
+    color: var(--gain);
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 8px 36px rgba(59,230,160,.22);
+  }
+  .recover .split { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; margin-top: 6px; }
+  .recover .per { color: var(--muted); font-size: 1rem; font-weight: 500; }
+  .recover .month { color: var(--muted); font-size: .95rem; }
+  .recover .month b { color: var(--gain); font-weight: 600; }
+  .recover .note {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+    font-size: .85rem;
+    color: var(--muted-2);
+    max-width: 56ch;
+  }
+
+  footer {
+    margin-top: 40px;
+    text-align: center;
+    font-size: .82rem;
+    color: var(--muted-2);
+    opacity: 0;
+    animation: rise .7s .3s cubic-bezier(.2,.7,.2,1) forwards;
+  }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; }
+    header, .inputs, .results, footer { opacity: 1 !important; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand"><span class="dot"></span> Recuperador de Encomendas</div>
+      <div class="tag">Multibanco · MB WAY</div>
+    </header>
+
+    <div class="grid">
+      <!-- ===== INPUTS ===== -->
+      <section class="inputs" aria-label="Dados da loja">
+        <h2>Os teus números</h2>
+
+        <div class="field">
+          <label for="orders">Encomendas por dia
+            <span class="hint">Total de encomendas feitas na loja, por dia</span>
+          </label>
+          <div class="num">
+            <input type="number" id="orders" min="0" step="1" value="20" inputmode="numeric">
+            <span class="affix">/dia</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="avg">Valor médio por encomenda
+            <span class="hint">Quanto vale, em média, cada encomenda</span>
+          </label>
+          <div class="num">
+            <span class="affix">€</span>
+            <input type="number" id="avg" min="0" step="0.5" value="45" inputmode="decimal">
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="pct-head">
+            <label for="mb" style="margin:0">% pago com Multibanco / MB WAY</label>
+            <span class="pct-val" id="mbVal">40%</span>
+          </div>
+          <input type="range" class="slider-mb" id="mb" min="0" max="100" step="1" value="40">
+          <span class="slider-hint mb" id="mbCount"></span>
+        </div>
+
+        <div class="field">
+          <div class="pct-head">
+            <label for="paid" style="margin:0">% dessas que são <em>pagas</em></label>
+            <span class="pct-val" id="paidVal">70%</span>
+          </div>
+          <input type="range" class="slider-paid" id="paid" min="0" max="100" step="1" value="70">
+          <span class="slider-hint paid" id="paidCount"></span>
+        </div>
+      </section>
+
+      <!-- ===== RESULTADOS ===== -->
+      <section class="results" aria-live="polite">
+        <div class="hero">
+          <div class="eyebrow">Estás a deixar em cima da mesa</div>
+          <div><span class="big" id="lostYear">€0</span> <span class="per">/ ano</span></div>
+          <p class="sub">Receita de encomendas geradas com Multibanco/MB WAY que <strong>nunca chegam a ser pagas</strong>.</p>
+        </div>
+
+        <div class="stat-row">
+          <div class="stat">
+            <div class="k">Perda por mês</div>
+            <div class="v" id="lostMonth">€0</div>
+          </div>
+          <div class="stat">
+            <div class="k">Encomendas não pagas / ano</div>
+            <div class="v" id="unpaidYear">0</div>
+          </div>
+        </div>
+
+        <div class="recover">
+          <span class="seal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+            Com lembretes automáticos por WhatsApp
+          </span>
+          <div class="lead">Recuperas, de forma realista, cerca de</div>
+          <div class="split">
+            <span class="big" id="recYear">€0</span>
+            <span class="per">/ ano</span>
+          </div>
+          <p class="note">Estimativa com base numa taxa de recuperação de 10% sobre as encomendas não pagas, através do envio automatizado de lembretes de pagamento por WhatsApp.</p>
+        </div>
+      </section>
+    </div>
+
+    <footer>Simulação ilustrativa · cálculo com 30 dias/mês e 365 dias/ano</footer>
+  </div>
+
+<script>
+  // ---- Formatadores PT-PT ----
+  const eur = new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+  const num = new Intl.NumberFormat('pt-PT', { maximumFractionDigits: 0 });
+  const num1 = new Intl.NumberFormat('pt-PT', { maximumFractionDigits: 1 });
+
+  // ---- Elementos ----
+  const el = {
+    orders: document.getElementById('orders'),
+    avg:    document.getElementById('avg'),
+    mb:     document.getElementById('mb'),
+    paid:   document.getElementById('paid'),
+    mbVal:  document.getElementById('mbVal'),
+    paidVal:document.getElementById('paidVal'),
+    mbCount:  document.getElementById('mbCount'),
+    paidCount:document.getElementById('paidCount'),
+    lostYear:  document.getElementById('lostYear'),
+    lostMonth: document.getElementById('lostMonth'),
+    unpaidYear:document.getElementById('unpaidYear'),
+    recYear:   document.getElementById('recYear'),
+  };
+
+  // Lê um campo numérico, sem negativos / NaN
+  function read(input) {
+    const v = parseFloat(input.value);
+    return (isNaN(v) || v < 0) ? 0 : v;
+  }
+  // Percentagem 0–100
+  function readPct(input) {
+    let v = parseFloat(input.value);
+    if (isNaN(v)) v = 0;
+    return Math.min(100, Math.max(0, v));
+  }
+
+  // ---- Count-up animado ----
+  const anim = new WeakMap(); // node -> {raf, from}
+  function countUp(node, to, fmt) {
+    const state = anim.get(node) || {};
+    const from = state.current ?? 0;
+    const start = performance.now();
+    const dur = 550;
+    if (state.raf) cancelAnimationFrame(state.raf);
+
+    function frame(now) {
+      const t = Math.min(1, (now - start) / dur);
+      const eased = 1 - Math.pow(1 - t, 3); // easeOutCubic
+      const val = from + (to - from) * eased;
+      node.textContent = fmt(val);
+      if (t < 1) {
+        state.raf = requestAnimationFrame(frame);
+      } else {
+        state.raf = null;
+        state.current = to;
+      }
+      anim.set(node, state);
+    }
+    state.current = from;
+    anim.set(node, state);
+    state.raf = requestAnimationFrame(frame);
+  }
+
+  // ---- Cálculo principal ----
+  function calcular(animateNumbers = true) {
+    const orders = read(el.orders);
+    const avg    = read(el.avg);
+    const pctMB  = readPct(el.mb);
+    const pctPaid= readPct(el.paid);
+
+    el.mbVal.textContent   = pctMB + '%';
+    el.paidVal.textContent = pctPaid + '%';
+
+    const unpaidRate         = 1 - pctPaid / 100;
+    const mbOrdersPerDay     = orders * (pctMB / 100);
+    const unpaidOrdersPerDay = mbOrdersPerDay * unpaidRate;
+    const lostPerDay         = unpaidOrdersPerDay * avg;
+
+    const lostPerMonth       = lostPerDay * 30;
+    const lostPerYear        = lostPerDay * 365;
+    const unpaidPerYear      = unpaidOrdersPerDay * 365;
+
+    const recoverablePerYear  = lostPerYear * 0.10;
+
+    // Contagens efetivas por baixo dos sliders (tempo real)
+    const mbOrdersPerMonth   = mbOrdersPerDay * 30;
+    const paidOrdersPerDay   = mbOrdersPerDay * (pctPaid / 100);
+    const paidOrdersPerMonth = paidOrdersPerDay * 30;
+    el.mbCount.innerHTML =
+      '≈ <b>' + num1.format(mbOrdersPerDay) + '</b> encomendas/dia · <b>' + num.format(mbOrdersPerMonth) + '</b>/mês com MB/MB WAY';
+    el.paidCount.innerHTML =
+      '≈ <b>' + num1.format(paidOrdersPerDay) + '</b> pagas/dia · <b>' + num.format(paidOrdersPerMonth) + '</b>/mês';
+
+    if (animateNumbers) {
+      countUp(el.lostYear,   lostPerYear,        eur.format);
+      countUp(el.lostMonth,  lostPerMonth,       eur.format);
+      countUp(el.unpaidYear, unpaidPerYear,      num.format);
+      countUp(el.recYear,    recoverablePerYear, eur.format);
+    } else {
+      el.lostYear.textContent   = eur.format(lostPerYear);
+      el.lostMonth.textContent  = eur.format(lostPerMonth);
+      el.unpaidYear.textContent = num.format(unpaidPerYear);
+      el.recYear.textContent    = eur.format(recoverablePerYear);
+    }
+  }
+
+  // ---- Ligações ----
+  [el.orders, el.avg, el.mb, el.paid].forEach(node =>
+    node.addEventListener('input', () => calcular(true))
+  );
+
+  // Primeiro render (animado a partir de 0 para efeito de entrada)
+  calcular(true);
+</script>
+</body>
+</html>
