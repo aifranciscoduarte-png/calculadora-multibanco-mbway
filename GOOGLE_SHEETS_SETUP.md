@@ -66,7 +66,7 @@ function doPost(e) {
 
 ## 4. Colar o URL na calculadora
 
-Abre o `index.html` e na zona de config (perto do fim, no `<script>`) cola o URL:
+Abre o `resultado.html` e na zona de config (perto do fim, no `<script>`) cola o URL:
 
 ```javascript
 const LEADS_ENDPOINT = "https://script.google.com/macros/s/AKfy....../exec";
@@ -76,8 +76,9 @@ const LEADS_ENDPOINT = "https://script.google.com/macros/s/AKfy....../exec";
 
 ## Testar
 
-1. Abre a calculadora, preenche os dados, clica **Ver o meu resultado**, preenche o formulário e submete.
-2. Confirma que aparece uma nova linha na folha do Google.
+1. Abre o `index.html`, preenche os dados e clica **Ver quanto estás a perder** (vai para `resultado.html`).
+2. Em `resultado.html`, preenche o formulário de contacto e clica **Ver o meu resultado completo**.
+3. Confirma que aparece uma nova linha na folha do Google.
 
 > Se mudares o código do script mais tarde, tens de criar uma **Nova implementação** (ou
 > *Gerir implementações → editar → Nova versão*) para o URL passar a usar a versão atualizada.

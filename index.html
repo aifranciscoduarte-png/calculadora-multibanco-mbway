@@ -3,380 +3,88 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Calculadora · Encomendas MB/MB WAY não pagas</title>
+<title>Calculadora · Quanto perdes em encomendas MB / MB WAY não pagas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Familjen+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg:        #0E0F13;
-    --bg-2:      #14151A;
-    --panel:     #16171D;
-    --panel-2:   #1B1D24;
-    --line:      rgba(255,255,255,.08);
-    --line-2:    rgba(255,255,255,.14);
-    --text:      #ECEDF1;
-    --muted:     #8B8F9C;
-    --muted-2:   #5E626E;
-    --loss:      #FF5C49;
-    --loss-dim:  rgba(255,92,73,.14);
-    --gain:      #3BE6A0;
-    --gain-dim:  rgba(59,230,160,.12);
-    --display:   "Fraunces", Georgia, serif;
-    --body:      "Familjen Grotesk", system-ui, sans-serif;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { -webkit-text-size-adjust: 100%; }
-
-  body {
-    font-family: var(--body);
-    color: var(--text);
-    background:
-      radial-gradient(1200px 600px at 85% -10%, rgba(255,92,73,.10), transparent 60%),
-      radial-gradient(900px 500px at 5% 110%, rgba(59,230,160,.07), transparent 55%),
-      var(--bg);
-    min-height: 100vh;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-    position: relative;
-  }
-  body::after {
-    content: "";
-    position: fixed; inset: 0;
-    pointer-events: none; opacity: .035; z-index: 9999;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
-
-  .wrap {
-    max-width: 1180px; margin: 0 auto;
-    padding: clamp(28px, 5vw, 72px) clamp(20px, 4vw, 48px) 64px;
-  }
-
-  header {
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 16px; flex-wrap: wrap;
-    margin-bottom: clamp(32px, 5vw, 56px);
-    opacity: 0; animation: rise .7s .05s cubic-bezier(.2,.7,.2,1) forwards;
-  }
-  .brand { display: flex; align-items: center; gap: 11px; font-weight: 600; letter-spacing: .01em; }
-  .brand .dot { width: 11px; height: 11px; border-radius: 50%; background: var(--loss); box-shadow: 0 0 0 4px var(--loss-dim); }
-  .tag { font-size: .78rem; color: var(--muted); border: 1px solid var(--line); padding: 6px 12px; border-radius: 100px; letter-spacing: .02em; }
-
-  .grid {
-    display: grid;
-    grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr);
-    gap: clamp(20px, 3vw, 36px);
-    align-items: start;
-  }
-  @media (max-width: 880px) { .grid { grid-template-columns: 1fr; } }
-
-  /* ---------- Inputs ---------- */
-  .inputs {
-    background: linear-gradient(180deg, var(--panel-2), var(--panel));
-    border: 1px solid var(--line); border-radius: 22px;
-    padding: clamp(22px, 3vw, 32px);
-    opacity: 0; animation: rise .7s .12s cubic-bezier(.2,.7,.2,1) forwards;
-  }
-  .inputs h2 {
-    font-family: var(--body); font-size: .82rem; font-weight: 600;
-    text-transform: uppercase; letter-spacing: .14em; color: var(--muted); margin-bottom: 24px;
-  }
-  .field { margin-bottom: 26px; }
-  .field:last-child { margin-bottom: 0; }
-  .field > label { display: block; font-size: .95rem; font-weight: 500; margin-bottom: 12px; color: var(--text); }
-  .field .hint { display: block; font-size: .8rem; color: var(--muted-2); font-weight: 400; margin-top: 3px; }
-
-  .num {
-    display: flex; align-items: center; gap: 8px;
-    background: var(--bg-2); border: 1px solid var(--line-2);
-    border-radius: 13px; padding: 0 16px;
-    transition: border-color .2s, box-shadow .2s;
-  }
-  .num:focus-within { border-color: rgba(255,92,73,.55); box-shadow: 0 0 0 4px var(--loss-dim); }
-  .num .affix { color: var(--muted); font-size: 1rem; font-weight: 500; }
-  .num input {
-    flex: 1; width: 100%; background: none; border: none; outline: none; color: var(--text);
-    font-family: var(--body); font-size: 1.25rem; font-weight: 600;
-    font-variant-numeric: tabular-nums; padding: 14px 0; min-width: 0;
-  }
-  .num input::-webkit-outer-spin-button, .num input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-  .num input[type=number] { -moz-appearance: textfield; appearance: textfield; }
-
-  .pct-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; }
-  .pct-val { font-family: var(--display); font-size: 1.5rem; font-weight: 600; font-variant-numeric: tabular-nums; }
-
-  input[type=range] {
-    -webkit-appearance: none; appearance: none; width: 100%; height: 6px;
-    border-radius: 100px; background: var(--bg-2); outline: none; cursor: pointer;
-  }
-  input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none; appearance: none; width: 22px; height: 22px; border-radius: 50%;
-    background: var(--text); border: 4px solid var(--bg); box-shadow: 0 2px 10px rgba(0,0,0,.5); transition: transform .12s;
-  }
-  input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.12); }
-  input[type=range]::-moz-range-thumb {
-    width: 18px; height: 18px; border-radius: 50%; background: var(--text);
-    border: 4px solid var(--bg); box-shadow: 0 2px 10px rgba(0,0,0,.5);
-  }
-  .slider-mb     { accent-color: var(--loss); }
-  .slider-unpaid { accent-color: var(--loss); }
-
-  .slider-hint { display: block; margin-top: 11px; font-size: .85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
-  .slider-hint b { color: var(--loss); font-weight: 600; }
-
-  /* ---------- Resultados ---------- */
-  .results {
-    display: flex; flex-direction: column; gap: 18px;
-    opacity: 0; animation: rise .7s .2s cubic-bezier(.2,.7,.2,1) forwards;
-  }
-
-  /* Valores monetários: mascarados enquanto bloqueado */
-  .money { transition: filter .5s ease, opacity .5s ease; }
-  .results.locked .money { filter: blur(11px); opacity: .55; user-select: none; }
-
-  .hero {
-    position: relative; overflow: hidden;
-    background:
-      radial-gradient(600px 240px at 100% 0%, var(--loss-dim), transparent 70%),
-      linear-gradient(180deg, var(--panel-2), var(--panel));
-    border: 1px solid rgba(255,92,73,.22); border-radius: 22px;
-    padding: clamp(26px, 3.2vw, 40px);
-  }
-  .hero .eyebrow { font-size: .82rem; font-weight: 600; text-transform: uppercase; letter-spacing: .14em; color: var(--loss); margin-bottom: 14px; }
-  .hero .big {
-    font-family: var(--display); font-weight: 700; font-size: clamp(3.1rem, 9vw, 5.4rem);
-    line-height: .95; letter-spacing: -.02em; color: var(--loss);
-    font-variant-numeric: tabular-nums; text-shadow: 0 8px 40px rgba(255,92,73,.25);
-  }
-  .hero .per { color: var(--muted); font-family: var(--body); font-size: 1.1rem; font-weight: 500; }
-  .hero .sub { margin-top: 14px; color: var(--muted); font-size: .98rem; max-width: 46ch; }
-
-  .stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-  @media (max-width: 460px) { .stat-row { grid-template-columns: 1fr; } }
-  .stat { background: linear-gradient(180deg, var(--panel-2), var(--panel)); border: 1px solid var(--line); border-radius: 18px; padding: 22px; }
-  .stat.teaser { border-color: rgba(255,92,73,.28); }
-  .stat .k { font-size: .8rem; color: var(--muted); font-weight: 500; letter-spacing: .02em; margin-bottom: 10px; }
-  .stat .v { font-family: var(--display); font-size: clamp(1.7rem, 3.4vw, 2.2rem); font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
-  .stat.teaser .v { color: var(--loss); }
-  .stat .ksub { display:block; font-size:.72rem; color: var(--muted-2); margin-top: 8px; }
-
-  .recover {
-    position: relative;
-    background:
-      radial-gradient(520px 220px at 0% 100%, var(--gain-dim), transparent 70%),
-      linear-gradient(180deg, var(--panel-2), var(--panel));
-    border: 1px solid rgba(59,230,160,.28); border-radius: 22px;
-    padding: clamp(24px, 3vw, 34px);
-  }
-  .recover .seal {
-    display: inline-flex; align-items: center; gap: 8px; font-size: .76rem; font-weight: 600;
-    letter-spacing: .03em; color: var(--gain); background: var(--gain-dim);
-    border: 1px solid rgba(59,230,160,.3); padding: 6px 12px; border-radius: 100px; margin-bottom: 16px;
-  }
-  .recover .seal svg { width: 14px; height: 14px; }
-  .recover .lead { font-size: 1.05rem; color: var(--text); margin-bottom: 6px; }
-  .recover .big {
-    font-family: var(--display); font-weight: 700; font-size: clamp(2.4rem, 6vw, 3.6rem);
-    line-height: 1; letter-spacing: -.02em; color: var(--gain);
-    font-variant-numeric: tabular-nums; text-shadow: 0 8px 36px rgba(59,230,160,.22);
-  }
-  .recover .split { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; margin-top: 6px; }
-  .recover .per { color: var(--muted); font-size: 1rem; font-weight: 500; }
-  .recover .note { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); font-size: .85rem; color: var(--muted-2); max-width: 56ch; }
-
-  /* ---------- Gate (CTA + formulário) ---------- */
-  .gate {
-    background: linear-gradient(180deg, var(--panel-2), var(--panel));
-    border: 1px solid var(--line-2); border-radius: 22px;
-    padding: clamp(24px, 3vw, 32px);
-    box-shadow: 0 20px 60px rgba(0,0,0,.35);
-  }
-  .results.unlocked .gate { display: none; }
-
-  .gate-lock { display: inline-flex; align-items: center; gap: 9px; color: var(--loss); font-weight: 600; font-size: .82rem; letter-spacing: .04em; text-transform: uppercase; margin-bottom: 14px; }
-  .gate-lock svg { width: 16px; height: 16px; }
-  .gate h3 { font-family: var(--display); font-weight: 600; font-size: clamp(1.5rem, 3.4vw, 2rem); line-height: 1.1; letter-spacing: -.01em; margin-bottom: 10px; }
-  .gate p.gsub { color: var(--muted); font-size: .98rem; max-width: 50ch; margin-bottom: 22px; }
-
-  .btn {
-    display: inline-flex; align-items: center; justify-content: center; gap: 9px;
-    width: 100%; padding: 16px 22px; border: none; border-radius: 14px; cursor: pointer;
-    font-family: var(--body); font-size: 1.05rem; font-weight: 600; color: #0E0F13;
-    background: linear-gradient(180deg, #FF7766, var(--loss));
-    box-shadow: 0 10px 30px rgba(255,92,73,.32); transition: transform .12s, box-shadow .2s, filter .2s;
-  }
-  .btn:hover { transform: translateY(-1px); box-shadow: 0 14px 38px rgba(255,92,73,.42); }
-  .btn:active { transform: translateY(0); }
-  .btn[disabled] { filter: grayscale(.4) brightness(.85); cursor: default; box-shadow: none; }
-
-  .gate-form { margin-top: 4px; }
-  .gate-form.hidden, .gate-cta.hidden { display: none; }
-  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
-  @media (max-width: 520px) { .form-grid { grid-template-columns: 1fr; } }
-  .ff { display: flex; flex-direction: column; gap: 7px; }
-  .ff.full { grid-column: 1 / -1; }
-  .ff label { font-size: .82rem; color: var(--muted); font-weight: 500; }
-  .ff input {
-    background: var(--bg-2); border: 1px solid var(--line-2); border-radius: 12px;
-    padding: 13px 14px; color: var(--text); font-family: var(--body); font-size: 1rem; outline: none;
-    transition: border-color .2s, box-shadow .2s;
-  }
-  .ff input::placeholder { color: var(--muted-2); }
-  .ff input:focus { border-color: rgba(255,92,73,.55); box-shadow: 0 0 0 4px var(--loss-dim); }
-  .ff input:invalid:not(:placeholder-shown) { border-color: rgba(255,92,73,.7); }
-  .gate-form .privacy { margin-top: 14px; font-size: .78rem; color: var(--muted-2); text-align: center; }
-  .form-error { color: var(--loss); font-size: .85rem; margin-top: 12px; min-height: 1.1em; text-align: center; }
-
-  /* Sucesso após submeter */
-  .success { display: none; }
-  .results.unlocked .success { display: flex; align-items: flex-start; gap: 12px;
-    background: var(--gain-dim); border: 1px solid rgba(59,230,160,.3); border-radius: 18px; padding: 18px 20px; }
-  .success svg { width: 22px; height: 22px; color: var(--gain); flex: none; margin-top: 1px; }
-  .success p { font-size: .95rem; color: var(--text); }
-  .success p b { color: var(--gain); }
-
-  footer { margin-top: 40px; text-align: center; font-size: .82rem; color: var(--muted-2); opacity: 0; animation: rise .7s .3s cubic-bezier(.2,.7,.2,1) forwards; }
-
-  @keyframes rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-  @media (prefers-reduced-motion: reduce) { * { animation: none !important; } header, .inputs, .results, footer { opacity: 1 !important; } }
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="wrap">
-    <header>
-      <div class="brand"><span class="dot"></span> Recuperador de Encomendas</div>
-      <div class="tag">Multibanco · MB WAY</div>
+    <header class="topbar">
+      <div class="brand"><span class="mark"></span> A Marca que Converte</div>
+      <div class="tag">Calculadora · MB / MB WAY</div>
     </header>
 
     <div class="grid">
-      <!-- ===== INPUTS ===== -->
-      <section class="inputs" aria-label="Dados da loja">
-        <h2>Os teus números</h2>
-
-        <div class="field">
-          <label for="orders">Encomendas por dia
-            <span class="hint">Total de encomendas que recebes na loja, por dia</span>
-          </label>
-          <div class="num">
-            <input type="number" id="orders" min="0" step="1" value="20" inputmode="numeric">
-            <span class="affix">/dia</span>
-          </div>
-        </div>
-
-        <div class="field">
-          <label for="avg">Valor médio por encomenda (AOV)
-            <span class="hint">Quanto vale, em média, cada encomenda</span>
-          </label>
-          <div class="num">
-            <span class="affix">€</span>
-            <input type="number" id="avg" min="0" step="0.5" value="45" inputmode="decimal">
-          </div>
-        </div>
-
-        <div class="field">
-          <div class="pct-head">
-            <label for="mb" style="margin:0">% de encomendas em Multibanco / MB WAY</label>
-            <span class="pct-val" id="mbVal">40%</span>
-          </div>
-          <input type="range" class="slider-mb" id="mb" min="0" max="100" step="1" value="40">
-          <span class="slider-hint" id="mbCount"></span>
-        </div>
-
-        <div class="field">
-          <div class="pct-head">
-            <label for="unpaid" style="margin:0">% dessas que <em>não</em> são pagas</label>
-            <span class="pct-val" id="unpaidVal">30%</span>
-          </div>
-          <input type="range" class="slider-unpaid" id="unpaid" min="0" max="100" step="1" value="30">
-          <span class="slider-hint" id="unpaidCount"></span>
-        </div>
+      <!-- ===== Hero ===== -->
+      <section class="hero-dark">
+        <span class="eyebrow">Recuperação MB WAY / Multibanco</span>
+        <h1>A tua loja está a perder dinheiro em cada encomenda não paga.</h1>
+        <p class="lede">Descobre em 30 segundos quanto deixas escapar por ano em encomendas Multibanco e MB WAY que nunca chegam a ser pagas.</p>
       </section>
 
-      <!-- ===== RESULTADOS (lead magnet) ===== -->
-      <section class="results locked" id="results" aria-live="polite">
+      <!-- ===== Inputs ===== -->
+      <section class="card">
+        <span class="eyebrow">Os teus números</span>
+        <h2>Preenche e calcula</h2>
 
-        <div class="hero">
-          <div class="eyebrow">Estás a deixar em cima da mesa</div>
-          <div><span class="big money" id="lostYear">€ ••••••</span> <span class="per">/ ano</span></div>
-          <p class="sub">Receita de encomendas geradas com Multibanco/MB WAY que <strong>nunca chegam a ser pagas</strong>.</p>
-        </div>
-
-        <div class="stat-row">
-          <div class="stat">
-            <div class="k">Perda por mês</div>
-            <div class="v money" id="lostMonth">€ ••••</div>
+        <form id="calcForm" novalidate>
+          <div class="field">
+            <label for="orders">Encomendas por dia
+              <span class="hint">Total de encomendas que recebes na loja, por dia</span>
+            </label>
+            <div class="num">
+              <input type="number" id="orders" min="0" step="1" value="20" inputmode="numeric">
+              <span class="affix">/dia</span>
+            </div>
           </div>
-          <div class="stat teaser">
-            <div class="k">Encomendas não pagas / ano</div>
-            <div class="v" id="unpaidYear">0</div>
-            <span class="ksub">já contabilizadas com os teus números</span>
-          </div>
-        </div>
 
-        <!-- Gate: CTA -> Formulário -->
-        <div class="gate" id="gate">
-          <div class="gate-cta" id="gateCta">
-            <span class="gate-lock">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-              Resultado bloqueado
-            </span>
-            <h3>Quanto estás mesmo a perder?</h3>
-            <p class="gsub">Deixa os teus dados e desbloqueia já o valor exato que estás a perder por ano com encomendas Multibanco/MB WAY não pagas.</p>
-            <button class="btn" id="unlockBtn" type="button">
-              Ver o meu resultado
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          <div class="field">
+            <label for="avg">Valor médio por encomenda (AOV)
+              <span class="hint">Quanto vale, em média, cada encomenda</span>
+            </label>
+            <div class="num">
+              <span class="affix">€</span>
+              <input type="number" id="avg" min="0" step="0.5" value="45" inputmode="decimal">
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="pct-head">
+              <label for="mb">% de encomendas em Multibanco / MB WAY</label>
+              <span class="pct-val" id="mbVal">40%</span>
+            </div>
+            <input type="range" id="mb" min="0" max="100" step="1" value="40">
+            <span class="slider-hint" id="mbCount"></span>
+          </div>
+
+          <div class="field">
+            <div class="pct-head">
+              <label for="unpaid">% dessas que <em>não</em> são pagas</label>
+              <span class="pct-val" id="unpaidVal">30%</span>
+            </div>
+            <input type="range" id="unpaid" min="0" max="100" step="1" value="30">
+            <span class="slider-hint" id="unpaidCount"></span>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn" type="submit">
+              Ver quanto estás a perder
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
             </button>
           </div>
-
-          <form class="gate-form hidden" id="leadForm" novalidate>
-            <span class="gate-lock">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-              Falta só um passo
-            </span>
-            <h3 style="font-size:clamp(1.3rem,3vw,1.7rem); margin-bottom:18px;">Para onde enviamos a tua análise?</h3>
-            <div class="form-grid">
-              <div class="ff">
-                <label for="f-nome">Nome</label>
-                <input id="f-nome" name="nome" type="text" placeholder="O teu nome" autocomplete="name" required>
-              </div>
-              <div class="ff">
-                <label for="f-email">Email</label>
-                <input id="f-email" name="email" type="email" placeholder="nome@email.com" autocomplete="email" required>
-              </div>
-              <div class="ff">
-                <label for="f-tel">Telemóvel / WhatsApp</label>
-                <input id="f-tel" name="telefone" type="tel" placeholder="+351 9•• ••• •••" autocomplete="tel" required>
-              </div>
-              <div class="ff">
-                <label for="f-loja">Nome ou site da loja</label>
-                <input id="f-loja" name="loja" type="text" placeholder="aminhaloja.pt" required>
-              </div>
-            </div>
-            <button class="btn" id="submitBtn" type="submit">Desbloquear resultado</button>
-            <div class="form-error" id="formError" role="alert"></div>
-            <p class="privacy">Os teus dados são usados apenas para te enviar a análise e entrar em contacto.</p>
-          </form>
-        </div>
-
-        <div class="success" id="success">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-          <p><b>Resultado desbloqueado.</b> Recebemos os teus dados e entramos em contacto em breve para te ajudar a recuperar este dinheiro.</p>
-        </div>
-
+        </form>
       </section>
     </div>
 
-    <footer>Simulação ilustrativa · cálculo com 30 dias/mês e 365 dias/ano</footer>
+    <footer class="foot">
+      <span>A Marca que Converte · 2025</span>
+      <span>IA &amp; Automação para E-commerce</span>
+    </footer>
   </div>
 
 <script>
-  // ====== CONFIG: destino dos leads (Google Sheets via Apps Script) ======
-  // Cola aqui o URL do teu Web App do Google Apps Script (ver instruções).
-  const LEADS_ENDPOINT = "";
-
-  // ---- Formatadores PT-PT ----
-  const eur  = new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
   const num  = new Intl.NumberFormat('pt-PT', { maximumFractionDigits: 0 });
   const num1 = new Intl.NumberFormat('pt-PT', { maximumFractionDigits: 1 });
 
@@ -389,140 +97,43 @@
     unpaidVal:document.getElementById('unpaidVal'),
     mbCount:    document.getElementById('mbCount'),
     unpaidCount:document.getElementById('unpaidCount'),
-    results:   document.getElementById('results'),
-    lostYear:  document.getElementById('lostYear'),
-    lostMonth: document.getElementById('lostMonth'),
-    unpaidYear:document.getElementById('unpaidYear'),
-    gateCta:   document.getElementById('gateCta'),
-    leadForm:  document.getElementById('leadForm'),
-    unlockBtn: document.getElementById('unlockBtn'),
-    submitBtn: document.getElementById('submitBtn'),
-    formError: document.getElementById('formError'),
+    form: document.getElementById('calcForm'),
   };
 
-  let unlocked = false;
+  const read    = (i) => { const v = parseFloat(i.value); return (isNaN(v) || v < 0) ? 0 : v; };
+  const readPct = (i) => { let v = parseFloat(i.value); if (isNaN(v)) v = 0; return Math.min(100, Math.max(0, v)); };
 
-  function read(input)    { const v = parseFloat(input.value); return (isNaN(v) || v < 0) ? 0 : v; }
-  function readPct(input) { let v = parseFloat(input.value); if (isNaN(v)) v = 0; return Math.min(100, Math.max(0, v)); }
-
-  // ---- Estado calculado (sempre atualizado, só revelado depois) ----
-  let R = {};
-  function compute() {
+  function update() {
     const orders = read(el.orders);
-    const avg    = read(el.avg);
     const pctMB  = readPct(el.mb);
     const pctUnpaid = readPct(el.unpaid);
 
     el.mbVal.textContent     = pctMB + '%';
     el.unpaidVal.textContent = pctUnpaid + '%';
 
-    const mbOrdersPerDay     = orders * (pctMB / 100);
-    const unpaidOrdersPerDay = mbOrdersPerDay * (pctUnpaid / 100);
-    const lostPerDay         = unpaidOrdersPerDay * avg;
+    const mbDay     = orders * (pctMB / 100);
+    const unpaidDay = mbDay * (pctUnpaid / 100);
 
-    R = {
-      orders, avg, pctMB, pctUnpaid,
-      mbOrdersPerDay,
-      mbOrdersPerMonth:   mbOrdersPerDay * 30,
-      unpaidOrdersPerDay,
-      unpaidOrdersPerMonth: unpaidOrdersPerDay * 30,
-      unpaidOrdersPerYear:  unpaidOrdersPerDay * 365,
-      lostPerMonth: lostPerDay * 30,
-      lostPerYear:  lostPerDay * 365,
-    };
-
-    // Pistas por baixo dos sliders
     el.mbCount.innerHTML =
-      '≈ <b>' + num1.format(R.mbOrdersPerDay) + '</b> encomendas/dia · <b>' + num.format(R.mbOrdersPerMonth) + '</b>/mês em MB/MB WAY';
+      '≈ <b>' + num1.format(mbDay) + '</b> encomendas/dia · <b>' + num.format(mbDay * 30) + '</b>/mês em MB/MB WAY';
     el.unpaidCount.innerHTML =
-      '≈ <b>' + num1.format(R.unpaidOrdersPerDay) + '</b> não pagas/dia · <b>' + num.format(R.unpaidOrdersPerMonth) + '</b>/mês';
-
-    // Número-isco (sempre visível)
-    el.unpaidYear.textContent = num.format(R.unpaidOrdersPerYear);
-
-    // Se já desbloqueado, manter os valores reais a acompanhar mudanças
-    if (unlocked) {
-      el.lostYear.textContent  = eur.format(R.lostPerYear);
-      el.lostMonth.textContent = eur.format(R.lostPerMonth);
-    }
+      '≈ <b>' + num1.format(unpaidDay) + '</b> não pagas/dia · <b>' + num.format(unpaidDay * 30) + '</b>/mês';
   }
 
-  // ---- Count-up animado (usado só na revelação) ----
-  function countUp(node, to, fmt) {
-    const start = performance.now(), dur = 700;
-    function frame(now) {
-      const t = Math.min(1, (now - start) / dur);
-      const eased = 1 - Math.pow(1 - t, 3);
-      node.textContent = fmt(to * eased);
-      if (t < 1) requestAnimationFrame(frame); else node.textContent = fmt(to);
-    }
-    requestAnimationFrame(frame);
-  }
+  [el.orders, el.avg, el.mb, el.unpaid].forEach(node => node.addEventListener('input', update));
 
-  function revealResults() {
-    unlocked = true;
-    el.results.classList.remove('locked');
-    el.results.classList.add('unlocked');
-    countUp(el.lostYear,  R.lostPerYear,  eur.format);
-    countUp(el.lostMonth, R.lostPerMonth, eur.format);
-    document.getElementById('success').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }
-
-  // ---- Envio do lead para Google Sheets ----
-  async function enviarLead(payload) {
-    if (!LEADS_ENDPOINT) { console.warn('LEADS_ENDPOINT vazio — lead não enviado.'); return; }
-    try {
-      await fetch(LEADS_ENDPOINT, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload),
-      });
-    } catch (err) {
-      console.error('Falha ao enviar lead:', err);
-    }
-  }
-
-  // ---- Ligações ----
-  [el.orders, el.avg, el.mb, el.unpaid].forEach(node => node.addEventListener('input', compute));
-
-  el.unlockBtn.addEventListener('click', () => {
-    el.gateCta.classList.add('hidden');
-    el.leadForm.classList.remove('hidden');
-    document.getElementById('f-nome').focus();
-  });
-
-  el.leadForm.addEventListener('submit', async (e) => {
+  el.form.addEventListener('submit', (e) => {
     e.preventDefault();
-    el.formError.textContent = '';
-    const nome  = document.getElementById('f-nome').value.trim();
-    const email = document.getElementById('f-email').value.trim();
-    const tel   = document.getElementById('f-tel').value.trim();
-    const loja  = document.getElementById('f-loja').value.trim();
-
-    if (!nome || !email || !tel || !loja) { el.formError.textContent = 'Preenche todos os campos.'; return; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { el.formError.textContent = 'Email inválido.'; return; }
-
-    el.submitBtn.disabled = true;
-    el.submitBtn.textContent = 'A desbloquear…';
-
-    await enviarLead({
-      nome, email, telefone: tel, loja,
-      encomendas_dia: R.orders,
-      valor_medio: R.avg,
-      pct_mb: R.pctMB,
-      pct_nao_pagas: R.pctUnpaid,
-      encomendas_nao_pagas_ano: Math.round(R.unpaidOrdersPerYear),
-      perda_mes: Math.round(R.lostPerMonth),
-      perda_ano: Math.round(R.lostPerYear),
-      origem: location.href,
+    const params = new URLSearchParams({
+      orders: read(el.orders),
+      avg:    read(el.avg),
+      mb:     readPct(el.mb),
+      unpaid: readPct(el.unpaid),
     });
-
-    revealResults();
+    window.location.href = 'resultado.html?' + params.toString();
   });
 
-  // primeiro cálculo
-  compute();
+  update();
 </script>
 </body>
 </html>

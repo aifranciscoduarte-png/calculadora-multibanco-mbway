@@ -1,39 +1,56 @@
 # Calculadora — Encomendas MB / MB WAY não pagas
 
-Ferramenta de vendas que mostra a uma loja online quanto dinheiro perde por ano com encomendas
-geradas em **Multibanco / MB WAY** que nunca chegam a ser pagas — e quanto disso é recuperável
-com lembretes automáticos por WhatsApp.
+Lead magnet (estilo *A Marca que Converte*) que mostra a uma loja online quanto dinheiro perde por
+ano com encomendas **Multibanco / MB WAY** que nunca chegam a ser pagas, capturando o contacto do
+visitante para depois o abordar.
+
+## Estrutura (2 páginas + estilos)
+
+- **`index.html`** — calculadora: o utilizador preenche os números e clica em *Ver quanto estás a perder*.
+- **`resultado.html`** — recebe os dados por URL, mostra o resultado **desfocado** e um formulário de
+  contacto (Nome, Email, Telemóvel/WhatsApp, Loja). Ao submeter, envia o lead e **revela** os valores.
+- **`styles.css`** — sistema visual partilhado (identidade de marca).
 
 ## Como abrir
-
-Duplo-clique no `index.html` ou:
 
 ```bash
 open index.html
 ```
 
-É um ficheiro único (HTML + CSS + JS embutidos), sem dependências nem build.
+Sem dependências nem build — site estático. Aloja em qualquer serviço estático (Vercel, GitHub Pages…).
 
-## Como alojar
+## Fluxo
 
-Basta enviar o `index.html` para qualquer alojamento estático (Netlify, GitHub Pages, Vercel,
-ou um simples servidor). Não precisa de backend.
+1. `index.html` → inputs → submete → redireciona para `resultado.html?orders=…&avg=…&mb=…&unpaid=…`
+2. `resultado.html` → resultado desfocado + número-isco visível (encomendas não pagas/ano)
+3. Formulário de contacto → envia o lead para Google Sheets → revela perda/ano e perda/mês
 
 ## Inputs
 
-1. **Encomendas por dia** — total de encomendas feitas na loja por dia.
-2. **Valor médio por encomenda** (€).
-3. **% pago com Multibanco / MB WAY** — fatia das encomendas feita com estes métodos.
-4. **% dessas que são pagas** — quantas das MB/MB WAY são efetivamente pagas.
+1. **Encomendas por dia** — total de encomendas recebidas por dia.
+2. **Valor médio por encomenda (AOV)** (€).
+3. **% de encomendas em Multibanco / MB WAY**.
+4. **% dessas que *não* são pagas**.
 
 ## Cálculo
 
 ```
-naoPagas/dia   = encomendas/dia × %MB × (1 − %pagas)
-perda/dia      = naoPagas/dia × valorMédio
-perda/mês      = perda/dia × 30
-perda/ano      = perda/dia × 365
-recuperável/ano = perda/ano × 10%   (taxa de recuperação via WhatsApp)
+naoPagas/dia = encomendas/dia × %MB × %naoPagas
+perda/dia    = naoPagas/dia × AOV
+perda/mês    = perda/dia × 30
+perda/ano    = perda/dia × 365
 ```
 
 Valores em euros (formato PT-PT). Base: 30 dias/mês, 365 dias/ano.
+
+## Captura de leads
+
+Os contactos são gravados numa Folha do Google via Apps Script. Configuração em
+**`GOOGLE_SHEETS_SETUP.md`** — falta colar o URL do Web App em `LEADS_ENDPOINT` (topo do `<script>`
+em `resultado.html`).
+
+## Identidade visual
+
+Segue o *Brand Guidelines v1.0*: Inter + JetBrains Mono; azul cobalto `#0052CC`, elétrico `#0066FF`
+(CTAs), quase-preto `#0A0F1E` (hero), ciano `#00B4D8`, glacial `#D6E4FF`, surface `#F0F4FF`.
+Cantos 6–8px (cards) / 4px (botões); gradiente azul apenas em hero/fundo.
