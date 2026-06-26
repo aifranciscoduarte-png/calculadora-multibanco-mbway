@@ -199,14 +199,17 @@
     el.submitBtn.disabled = true;
     el.submitBtn.textContent = 'A desbloquear…';
 
-    await enviarLead({
-      nome, email, telefone: tel, loja,
-      encomendas_dia: orders, valor_medio: avg, pct_mb: pctMB, pct_nao_pagas: pctUnpaid,
-      encomendas_nao_pagas_ano: Math.round(R.unpaidOrdersPerYear),
-      perda_mes: Math.round(R.lostPerMonth),
-      perda_ano: Math.round(R.lostPerYear),
-      origem: location.href,
-    });
+    // Só grava o lead se for qualificado: mais de 20 encomendas/dia
+    if (orders > 20) {
+      await enviarLead({
+        nome, email, telefone: tel, loja,
+        encomendas_dia: orders, valor_medio: avg, pct_mb: pctMB, pct_nao_pagas: pctUnpaid,
+        encomendas_nao_pagas_ano: Math.round(R.unpaidOrdersPerYear),
+        perda_mes: Math.round(R.lostPerMonth),
+        perda_ano: Math.round(R.lostPerYear),
+        origem: location.href,
+      });
+    }
 
     reveal();
   });
