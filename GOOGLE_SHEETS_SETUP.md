@@ -23,21 +23,11 @@ function doPost(e) {
     var sheet = ss.getSheetByName('Leads') || ss.getSheets()[0];
 
     if (sheet.getLastRow() === 0) {
-      sheet.appendRow([
-        'Data', 'Nome', 'Email', 'Telefone', 'Loja',
-        'Encomendas/dia', 'AOV', '% MB/MB WAY', '% não pagas',
-        'Encomendas não pagas/ano', 'Perda/mês (€)', 'Perda/ano (€)',
-        'Origem'
-      ]);
+      sheet.appendRow(['Nome', 'Loja', 'Email', 'Telefone']);
     }
 
     var d = JSON.parse(e.postData.contents);
-    sheet.appendRow([
-      new Date(), d.nome, d.email, d.telefone, d.loja,
-      d.encomendas_dia, d.valor_medio, d.pct_mb, d.pct_nao_pagas,
-      d.encomendas_nao_pagas_ano, d.perda_mes, d.perda_ano,
-      d.origem
-    ]);
+    sheet.appendRow([d.nome, d.loja, d.email, d.telefone]);
 
     lock.releaseLock();
     return ContentService
