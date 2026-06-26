@@ -61,7 +61,7 @@
               </div>
               <div class="ff">
                 <label for="f-tel">Telemóvel / WhatsApp</label>
-                <input id="f-tel" type="tel" placeholder="+351 9•• ••• •••" autocomplete="tel" required>
+                <input id="f-tel" type="tel" placeholder="+351 9•• ••• •••" autocomplete="tel" inputmode="tel" maxlength="20" required>
               </div>
               <div class="ff">
                 <label for="f-loja">Nome ou site da loja</label>
@@ -185,11 +185,18 @@
     if (!nome || !email || !tel || !loja) { el.formError.textContent = 'Preenche todos os campos.'; return; }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { el.formError.textContent = 'Email inválido.'; return; }
 
+    // Telemóvel português: 9 dígitos a começar em 9 (aceita +351 / 00351 e espaços)
+    const telDigits = tel.replace(/[\s().\-]/g, '').replace(/^(\+351|00351|351)/, '');
+    if (!/^9\d{8}$/.test(telDigits)) {
+      el.formError.textContent = 'Número de telemóvel inválido. Usa 9 dígitos (ex.: 912 345 678).';
+      return;
+    }
+
     el.submitBtn.disabled = true;
     el.submitBtn.textContent = 'A desbloquear…';
 
     await enviarLead({
-      nome, email, telefone: tel, loja,
+      nome, email, telefone: '+351' + telDigits, loja,
       encomendas_dia: orders, valor_medio: avg, pct_mb: pctMB, pct_nao_pagas: pctUnpaid,
       encomendas_nao_pagas_ano: Math.round(R.unpaidOrdersPerYear),
       perda_mes: Math.round(R.lostPerMonth),
