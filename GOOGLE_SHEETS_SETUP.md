@@ -33,7 +33,7 @@ function doPost(e) {
     var d = JSON.parse(e.postData.contents);
     sheet.appendRow([
       new Date(), d.nome, d.email, d.telefone, d.loja,
-      d.encomendas_dia, d.valor_medio,
+      d.encomendas_dia, d.valor_medio + ' €',
       d.pct_mb + '%', d.pct_nao_pagas + '%',
       d.encomendas_nao_pagas_ano,
       d.perda_mes + ' €', d.perda_ano + ' €'
