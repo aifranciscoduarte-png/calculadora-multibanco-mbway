@@ -103,6 +103,12 @@
   const read    = (i) => { const v = parseFloat(i.value); return (isNaN(v) || v < 0) ? 0 : v; };
   const readPct = (i) => { let v = parseFloat(i.value); if (isNaN(v)) v = 0; return Math.min(100, Math.max(0, v)); };
 
+  // Pré-preenche com os dados vindos do URL (ao voltar do resultado)
+  const qp = new URLSearchParams(location.search);
+  [['orders', el.orders], ['avg', el.avg], ['mb', el.mb], ['unpaid', el.unpaid]].forEach(([key, node]) => {
+    if (qp.has(key) && !isNaN(parseFloat(qp.get(key)))) node.value = qp.get(key);
+  });
+
   function update() {
     const orders = read(el.orders);
     const pctMB  = readPct(el.mb);
