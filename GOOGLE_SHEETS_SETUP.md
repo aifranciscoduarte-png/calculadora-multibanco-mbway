@@ -27,7 +27,7 @@ function doPost(e) {
         'Data', 'Nome', 'Email', 'Telefone', 'Loja',
         'Encomendas/dia', 'AOV', '% MB/MB WAY', '% não pagas',
         'Encomendas não pagas/ano', 'Perda/mês (€)', 'Perda/ano (€)',
-        'Recuperável/ano (€)', 'Origem'
+        'Origem'
       ]);
     }
 
@@ -36,7 +36,7 @@ function doPost(e) {
       new Date(), d.nome, d.email, d.telefone, d.loja,
       d.encomendas_dia, d.valor_medio, d.pct_mb, d.pct_nao_pagas,
       d.encomendas_nao_pagas_ano, d.perda_mes, d.perda_ano,
-      d.recuperavel_ano, d.origem
+      d.origem
     ]);
 
     lock.releaseLock();

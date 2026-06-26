@@ -322,7 +322,7 @@
               Resultado bloqueado
             </span>
             <h3>Quanto estás mesmo a perder?</h3>
-            <p class="gsub">Deixa os teus dados e desbloqueia já o valor exato que perdes por ano — e quanto consegues recuperar com lembretes automáticos por WhatsApp.</p>
+            <p class="gsub">Deixa os teus dados e desbloqueia já o valor exato que estás a perder por ano com encomendas Multibanco/MB WAY não pagas.</p>
             <button class="btn" id="unlockBtn" type="button">
               Ver o meu resultado
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
@@ -359,19 +359,6 @@
           </form>
         </div>
 
-        <div class="recover">
-          <span class="seal">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-            Com lembretes automáticos por WhatsApp
-          </span>
-          <div class="lead">Recuperas, de forma realista, cerca de</div>
-          <div class="split">
-            <span class="big money" id="recYear">€ ••••</span>
-            <span class="per">/ ano</span>
-          </div>
-          <p class="note">Estimativa com base numa taxa de recuperação de 10% sobre as encomendas não pagas, através do envio automatizado de lembretes de pagamento por WhatsApp.</p>
-        </div>
-
         <div class="success" id="success">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
           <p><b>Resultado desbloqueado.</b> Recebemos os teus dados e entramos em contacto em breve para te ajudar a recuperar este dinheiro.</p>
@@ -406,7 +393,6 @@
     lostYear:  document.getElementById('lostYear'),
     lostMonth: document.getElementById('lostMonth'),
     unpaidYear:document.getElementById('unpaidYear'),
-    recYear:   document.getElementById('recYear'),
     gateCta:   document.getElementById('gateCta'),
     leadForm:  document.getElementById('leadForm'),
     unlockBtn: document.getElementById('unlockBtn'),
@@ -443,7 +429,6 @@
       unpaidOrdersPerYear:  unpaidOrdersPerDay * 365,
       lostPerMonth: lostPerDay * 30,
       lostPerYear:  lostPerDay * 365,
-      recoverablePerYear: lostPerDay * 365 * 0.10,
     };
 
     // Pistas por baixo dos sliders
@@ -459,7 +444,6 @@
     if (unlocked) {
       el.lostYear.textContent  = eur.format(R.lostPerYear);
       el.lostMonth.textContent = eur.format(R.lostPerMonth);
-      el.recYear.textContent   = eur.format(R.recoverablePerYear);
     }
   }
 
@@ -479,9 +463,8 @@
     unlocked = true;
     el.results.classList.remove('locked');
     el.results.classList.add('unlocked');
-    countUp(el.lostYear,  R.lostPerYear,        eur.format);
-    countUp(el.lostMonth, R.lostPerMonth,       eur.format);
-    countUp(el.recYear,   R.recoverablePerYear, eur.format);
+    countUp(el.lostYear,  R.lostPerYear,  eur.format);
+    countUp(el.lostMonth, R.lostPerMonth, eur.format);
     document.getElementById('success').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
@@ -532,7 +515,6 @@
       encomendas_nao_pagas_ano: Math.round(R.unpaidOrdersPerYear),
       perda_mes: Math.round(R.lostPerMonth),
       perda_ano: Math.round(R.lostPerYear),
-      recuperavel_ano: Math.round(R.recoverablePerYear),
       origem: location.href,
     });
 
